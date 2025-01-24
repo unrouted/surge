@@ -10,13 +10,38 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
-
+    if: github.event_name != 'release'
     steps:
     - uses: actions/checkout@v3
     - name: Build
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
+
+  release:
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next'
+    runs-on: ubuntu-latest
+    environment: default
+    needs: [test]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+
+    - name: Release
+      uses: cycjimmy/semantic-release-action@v4
+      with:
+        extra_plugins: |
+          @semantic-release/changelog
+          @semantic-release/git
+          @semantic-release/github
+          @semantic-release/commit-analyzer
+          @semantic-release/release-notes-generator
+          conventional-changelog-conventionalcommits
+          @semantic-release/exec
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
