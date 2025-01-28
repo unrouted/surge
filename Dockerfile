@@ -1,4 +1,4 @@
-FROM rust:1-buster as build
+FROM rust:1-bookworm as build
 
 WORKDIR /usr/src/operator
 
