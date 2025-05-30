@@ -158,17 +158,9 @@ async fn ensure_node_registered(
                 .path_segments()
                 .context("AuthURL has no path segments")?
                 .last()
-                .unwrap()
-                .split_once(':')
-                .unwrap()
-                .1;
+                .unwrap();
 
-            // We check this nodekey isn't already registed
-            // This is just belts and braces to prevent calling register multiple times for the same nodekey
-            match api::get_node_by_nodekey(ctx, nodekey).await? {
-                Some(machine) => machine,
-                None => api::register_node(ctx, nodekey, user).await?,
-            }
+            api::register_node(ctx, nodekey, user).await?
         }
         "Running" => {
             let nodekey = &payload.this_node.node_key;
